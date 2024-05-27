@@ -1,0 +1,27 @@
+{
+  "name": "placa-fipe-api",
+  "version": "1.0.1",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "star": "node ."
+  },
+  "keywords": [
+    "placa-api",
+    "fipe",
+    "placa",
+    "carro",
+    "veiculo",
+    "automovel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/broflovsk/placa-fipe-api.git"
+  },
+  "author": "seshdev",
+  "license": "MIT",
+  "description": "Está biblioteca é para buscar dados de veículos a partir da placa, para isso é utilizado os dados fornecidos do site Tabela Fipe Brasil. Ela também verifica se o valor pesquisada realmente é uma placa válida.",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12"
+  }
+}
