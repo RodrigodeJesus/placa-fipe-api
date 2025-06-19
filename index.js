@@ -1,56 +1,37 @@
+const express = require("express");
+const cheerio = require("cheerio");
+const axios = require("axios");
+const cors = require("cors");
 
-import cheerio from "cheerio"
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-/**
- * @param {{ placa: string }} 
- * @returns {Object}
- */
+app.use(cors());
 
-export async function consultarPlaca({placa}) {
-    const req = await fetch(`https://www.tabelafipebrasil.com/placa?placa=${placa}`, {
-        "headers": {
-            "sec-ch-ua": "\"Brave\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "upgrade-insecure-requests": "1",
-            "Referer": "https://www.tabelafipebrasil.com/placa",
-            "Referrer-Policy": "strict-origin-when-cross-origin"
-        },
-        "body": null,
-        "method": "GET"
+app.get("/:placa", async (req, res) => {
+  const placa = req.params.placa.toUpperCase();
+  const url = `https://www.tabelafipebrasil.com/placa?placa=${placa}`;
+
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+
+    const result = {};
+    $("ul.list-group li").each((_, el) => {
+      const texto = $(el).text().split(":");
+      if (texto.length === 2) {
+        result[texto[0].trim()] = texto[1].trim();
+      }
     });
 
-    const res = await req.text();
-    const $ = cheerio.load(res);
+    result["placa"] = placa;
+    res.json(result);
+  } catch (err) {
+    console.error("Erro ao buscar:", err.message);
+    res.status(500).json({ erro: "Não foi possível buscar a placa." });
+  }
+});
 
-    const table1 = $('.fipeTablePriceDetail');
-    const data1 = {};
-
-    table1.find('tr').each((index, element) => {
-        const key = $(element).find('td').first().text().replace(':', '').trim();
-        const value = $(element).find('td').last().text().trim();
-        data1[key] = value;
-    });
-
-    const table2 = $('.fipe-desktop');
-    const fipeData = [];
-
-    table2.find('tr').each((index, element) => {
-        if (index === 0) return; 
-        const row = {};
-        $(element).find('td').each((i, td) => {
-            const text = $(td).text().trim();
-            if (i === 0) row['Código FIPE'] = text;
-            if (i === 1) row['Modelo'] = text;
-            if (i === 2) row['Valor'] = text;
-        });
-
-        data1['Fipe'] = row;
-    });
-
-   if (Object.keys(data1).length === 0) {
-   return { error: "Placa não encontrada." }
-}
-
-  return data1
-}
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
