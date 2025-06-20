@@ -19,6 +19,13 @@ app.get("/:placa", async (req, res) => {
         "Accept": "text/html",
         "Accept-Language": "pt-BR,pt;q=0.9"
       }
+      headers: {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+  "Accept": "text/html",
+  "Accept-Language": "pt-BR,pt;q=0.9",
+  "Referer": "https://www.tabelafipebrasil.com/",
+  "Connection": "keep-alive"
+}
     });
 
     const $ = cheerio.load(data);
