@@ -21,38 +21,42 @@ app.get("/:placa", async (req, res) => {
       }
     });
 
-    if (!data || data.includes("Erro") || data.length < 100) {
-      return res.status(500).json({ erro: "Página inválida ou placa não encontrada." });
-    }
-
     const $ = cheerio.load(data);
-    const result = {};
+    const result = { placa };
 
+    // Seleciona cada <li> com base na classe da lista
     $("ul.list-group li").each((_, el) => {
-      const texto = $(el).text().split(":");
-      if (texto.length === 2) {
-        result[texto[0].trim()] = texto[1].trim();
+      const texto = $(el).text().trim();
+      if (texto.includes(":")) {
+        const [chave, valor] = texto.split(":");
+        result[chave.trim().toLowerCase()] = valor.trim();
       }
     });
 
-    result["placa"] = placa;
+    // IPVA estimado
+    const ipvaTexto = $("p:contains('IPVA')").text();
+    const ipvaMatch = ipvaTexto.match(/IPVA 2025.*?R\$ ([\d.,]+)/i);
+    if (ipvaMatch) {
+      result["ipva_2025"] = ipvaMatch[1];
+    }
 
-    if (Object.keys(result).length <= 1) {
-      return res.status(404).json({ erro: "Placa não encontrada ou site alterado." });
+    // Código FIPE (procura pelo padrão FIPE na tabela de valores)
+    const fipeMatch = $("td:contains('Valor')").first().text().match(/R\$ ([\d.,]+)/);
+    if (fipeMatch) {
+      result["valor_fipe"] = fipeMatch[1];
     }
 
     res.json(result);
   } catch (err) {
-    console.error("Erro ao buscar:", err.message);
+    console.error("❌ Erro:", err.message);
     res.status(500).json({ erro: "Não foi possível buscar a placa." });
   }
 });
 
 app.get("/", (req, res) => {
-  res.send("✅ API de placa está online! Use /PZS3819 para consultar.");
+  res.send("✅ API de placa rodando! Use /PZS3819 para testar.");
 });
 
-
 app.listen(PORT, () => {
-  console.log(`🚀 API rodando em http://localhost:${PORT}`);
+  console.log(`🚗 API rodando em http://localhost:${PORT}`);
 });
