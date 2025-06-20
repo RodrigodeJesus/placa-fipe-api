@@ -13,7 +13,7 @@ app.get("/:placa", async (req, res) => {
   const url = `https://www.tabelafipebrasil.com/placa?placa=${placa}`;
 
   try {
-    const { data } = await axios.get(url, {
+    const { data } = await axios.get(url,  {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept": "text/html",
@@ -27,6 +27,7 @@ app.get("/:placa", async (req, res) => {
   "Connection": "keep-alive"
 }
     });
+console.log(data); // Veja o que retorna
 
     const $ = cheerio.load(data);
     const result = { placa };
