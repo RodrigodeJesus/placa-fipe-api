@@ -48,6 +48,11 @@ app.get("/:placa", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  res.send("✅ API de placa está online! Use /PZS3819 para consultar.");
+});
+
+
 app.listen(PORT, () => {
   console.log(`🚀 API rodando em http://localhost:${PORT}`);
 });
