@@ -13,7 +13,14 @@ app.get("/:placa", async (req, res) => {
   const url = `https://www.tabelafipebrasil.com/placa?placa=${placa}`;
 
   try {
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Accept": "text/html",
+    "Accept-Language": "pt-BR,pt;q=0.9"
+  }
+});
+
     const $ = cheerio.load(data);
 
     const result = {};
