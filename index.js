@@ -14,16 +14,20 @@ app.get("/:placa", async (req, res) => {
 
   try {
     const { data } = await axios.get(url, {
-  headers: {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Accept": "text/html",
-    "Accept-Language": "pt-BR,pt;q=0.9"
-  }
-});
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "text/html",
+        "Accept-Language": "pt-BR,pt;q=0.9"
+      }
+    });
+
+    if (!data || data.includes("Erro") || data.length < 100) {
+      return res.status(500).json({ erro: "Página inválida ou placa não encontrada." });
+    }
 
     const $ = cheerio.load(data);
-
     const result = {};
+
     $("ul.list-group li").each((_, el) => {
       const texto = $(el).text().split(":");
       if (texto.length === 2) {
@@ -32,6 +36,11 @@ app.get("/:placa", async (req, res) => {
     });
 
     result["placa"] = placa;
+
+    if (Object.keys(result).length <= 1) {
+      return res.status(404).json({ erro: "Placa não encontrada ou site alterado." });
+    }
+
     res.json(result);
   } catch (err) {
     console.error("Erro ao buscar:", err.message);
@@ -40,5 +49,5 @@ app.get("/:placa", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`🚀 API rodando em http://localhost:${PORT}`);
 });
